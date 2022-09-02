@@ -161,8 +161,11 @@ def calc_location(dimension, proj_matrix, box_2d, alpha, theta_ray):
             u0, u1 = u.min(), u.max()
             v0, v1 = v.min(), v.max()
             eps = 1e-2
-            if (u0 >= xmin - eps and u1 <= xmax + eps and v0 >= ymin - eps
-                    and v1 <= ymax + eps):
+            umin = (xmin - proj_matrix[0][2]) / proj_matrix[0][0] - eps
+            umax = (xmax - proj_matrix[0][2]) / proj_matrix[0][0] + eps
+            vmin = (ymin - proj_matrix[1][2]) / proj_matrix[1][1] - eps
+            vmax = (ymax - proj_matrix[1][2]) / proj_matrix[1][1] + eps
+            if u0 >= umin and u1 <= umax and v0 >= vmin and v1 <= vmax:
                 count += 1  # for debugging
                 best_loc = loc
                 best_error = error
