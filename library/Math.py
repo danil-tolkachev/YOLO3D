@@ -100,9 +100,6 @@ def calc_location(dimension, proj_matrix, box_2d, alpha, theta_ray):
                 for bottom in bottom_constraints:
                     constraints.append([left, top, right, bottom])
 
-    # filter out the ones with repeats
-    constraints = filter(lambda x: len(x) == len(set(tuple(i) for i in x)), constraints)
-
     # create pre M (the term with I and the R*X)
     pre_M = np.zeros([4,4])
     # 1's down diagonal
