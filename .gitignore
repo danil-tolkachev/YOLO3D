@@ -276,5 +276,4 @@ fabric.properties
 ## My Exclude
 notebook.ipynb
 *.pkl
-*.ipynb
 
