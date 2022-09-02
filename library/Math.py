@@ -107,8 +107,12 @@ def calc_location(dimension, proj_matrix, box_2d, alpha, theta_ray):
         pre_M[i][i] = 1
 
     best_loc = None
-    best_error = [1e09]
+    best_iou = 0
     best_X = None
+    umin = (xmin - proj_matrix[0][2]) / proj_matrix[0][0]
+    umax = (xmax - proj_matrix[0][2]) / proj_matrix[0][0]
+    vmin = (ymin - proj_matrix[1][2]) / proj_matrix[1][1]
+    vmax = (ymax - proj_matrix[1][2]) / proj_matrix[1][1]
 
     # loop through each possible constraint, hold on to the best guess
     # constraint will be 1024 sets of 4 corners
@@ -151,25 +155,26 @@ def calc_location(dimension, proj_matrix, box_2d, alpha, theta_ray):
         # solve here with least squares, since over fit will get some error
         loc, error, rank, s = np.linalg.lstsq(A, b, rcond=None)
 
+        # check projected points
+        corners = np.array(create_corners(dimension, loc, R))
+        x, y, z = corners[:, 0], corners[:, 1], corners[:, 2]
+        u = x / z
+        v = y / z
+        u0, u1 = u.min(), u.max()
+        v0, v1 = v.min(), v.max()
+        isec = (min(u1, umax) - max(u0, umin)) * (min(v1, vmax) -
+                                                  max(v0, vmin))
+        union = (max(u1, umax) - min(u0, umin)) * (max(v1, vmax) -
+                                                   min(v0, vmin))
+        iou = isec / union
+
         # found a better estimation
-        if error < best_error:
-            # check projected points
-            corners = np.array(create_corners(dimension, loc, R))
-            x, y, z = corners[:, 0], corners[:, 1], corners[:, 2]
-            u = x / z
-            v = y / z
-            u0, u1 = u.min(), u.max()
-            v0, v1 = v.min(), v.max()
-            eps = 1e-2
-            umin = (xmin - proj_matrix[0][2]) / proj_matrix[0][0] - eps
-            umax = (xmax - proj_matrix[0][2]) / proj_matrix[0][0] + eps
-            vmin = (ymin - proj_matrix[1][2]) / proj_matrix[1][1] - eps
-            vmax = (ymax - proj_matrix[1][2]) / proj_matrix[1][1] + eps
-            if u0 >= umin and u1 <= umax and v0 >= vmin and v1 <= vmax:
-                count += 1  # for debugging
-                best_loc = loc
-                best_error = error
-                best_X = X_array
+        if iou > best_iou:
+            count += 1  # for debugging
+            best_loc = loc
+            best_iou = iou
+            best_X = X_array
+            best_error = error
 
     # return best_loc, [left_constraints, right_constraints] # for debugging
     best_loc = [best_loc[0][0], best_loc[1][0], best_loc[2][0]]

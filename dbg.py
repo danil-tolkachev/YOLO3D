@@ -46,7 +46,7 @@ def draw_on_image(ax, u, v, color1='C0', color2='C3'):
     ax.set_xlim(-1.25, 1.25)
 
 
-def f(width, length, height, x, y, z, theta):
+def f(width, length, height, x, y, z, theta, dw=0, dl=0, dh=0, dtheta=0):
     R = rotation_matrix(np.deg2rad(theta))
     corners = np.array(create_corners((height, length, width), (x, y, z), R))
     x, y, z = corners[:, 0], corners[:, 1], corners[:, 2]
@@ -68,12 +68,14 @@ def f(width, length, height, x, y, z, theta):
     P = np.eye(3, 4)
     box_2d = [(u0, v0), (u1, v1)]
     theta_ray = calc_theta_ray(1, box_2d, P)
-    alpha = np.deg2rad(theta) - theta_ray
+    alpha = np.deg2rad(theta + dtheta) - theta_ray
+    R = rotation_matrix(np.deg2rad(theta + dtheta))
 
-    location, X = calc_location((height, length, width), P, box_2d, alpha,
-                                theta_ray)
+    location, X = calc_location((height + dh, length + dl, width + dw), P,
+                                box_2d, alpha, theta_ray)
 
-    corners = np.array(create_corners((height, length, width), location, R))
+    corners = np.array(
+        create_corners((height + dh, length + dl, width + dw), location, R))
     x, y, z = corners[:, 0], corners[:, 1], corners[:, 2]
     u = x / z
     v = y / z
