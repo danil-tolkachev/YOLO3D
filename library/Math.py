@@ -153,10 +153,20 @@ def calc_location(dimension, proj_matrix, box_2d, alpha, theta_ray):
 
         # found a better estimation
         if error < best_error:
-            count += 1 # for debugging
-            best_loc = loc
-            best_error = error
-            best_X = X_array
+            # check projected points
+            corners = np.array(create_corners(dimension, loc, R))
+            x, y, z = corners[:, 0], corners[:, 1], corners[:, 2]
+            u = x / z
+            v = y / z
+            u0, u1 = u.min(), u.max()
+            v0, v1 = v.min(), v.max()
+            eps = 1e-2
+            if (u0 >= xmin - eps and u1 <= xmax + eps and v0 >= ymin - eps
+                    and v1 <= ymax + eps):
+                count += 1  # for debugging
+                best_loc = loc
+                best_error = error
+                best_X = X_array
 
     # return best_loc, [left_constraints, right_constraints] # for debugging
     best_loc = [best_loc[0][0], best_loc[1][0], best_loc[2][0]]

@@ -99,3 +99,4 @@ if __name__ == '__main__':
     f(width=2, length=5, height=1.5, x=0, y=1.5, z=10, theta=15)
     f(width=2, length=5, height=1.5, x=0, y=1.5, z=10, theta=1)
     f(width=2, length=5, height=1.5, x=-5.1, y=0, z=8.25, theta=158.4)
+    f(width=2, length=5, height=1.5, x=0, y=0.2, z=10, theta=95.4)
